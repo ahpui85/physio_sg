@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "550585278710",
+    "project_id": "physiosg-2b7ca",
+    "storage_bucket": "physiosg-2b7ca.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:550585278710:android:ab92cb6e9a39c91aecccd7",
+        "android_client_info": {
+          "package_name": "com.example.physiosg"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "550585278710-mh00rc3gdphc62k22g4oree9bnm676qm.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.physiosg",
+            "certificate_hash": "ed35b00aaa18af43b2f56a24d565b9e8e0a9398e"
+          }
+        },
+        {
+          "client_id": "550585278710-cr86qu6nfo4hbolk5f31khci6skj2a7f.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyANs7s6es6_B1hcqkzyRGop0CKlhJF3Uag"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "550585278710-cr86qu6nfo4hbolk5f31khci6skj2a7f.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
