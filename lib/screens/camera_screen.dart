@@ -5,6 +5,7 @@ import 'package:body_detection/body_detection.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:body_detection/models/image_result.dart';
 import 'package:firebase_signin/widget/asset_player_widget.dart';
+import 'package:firebase_signin/screens/exercise_screen.dart';
 
 class CameraScreen extends StatefulWidget {
   const CameraScreen({Key? key}) : super(key: key);
@@ -49,6 +50,7 @@ class _CameraScreenState extends State<CameraScreen> {
 
   Future<void> _stopCameraStream() async {
     await BodyDetection.stopCameraStream();
+    await BodyDetection.disablePoseDetection();
 
     setState(() {
       _cameraImage = null;
@@ -99,14 +101,38 @@ class _CameraScreenState extends State<CameraScreen> {
                   ),
                   child: Stack(children: <Widget>[
                     Container(child: _cameraImage),
-                    Text(
-                      "Counts: $reps",
-                      textAlign: TextAlign.center,
-                      style: const TextStyle(
-                          color: Colors.red,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 22.0),
-                    )
+                    Align(
+                      alignment: Alignment.bottomRight,
+                      child: RotatedBox(
+                          quarterTurns: 1,
+                          child: Text(
+                            "Counts: $reps",
+                            textAlign: TextAlign.center,
+                            style: const TextStyle(
+                                color: Colors.red,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 22.0),
+                          )),
+                    ),
+                    Positioned(
+                        right: 0,
+                        bottom: 0,
+                        child: RotatedBox(
+                            quarterTurns: 1,
+                            child: GestureDetector(
+                                onTap: () async {
+                                  _stopCameraStream();
+                                  await BodyDetection.disablePoseDetection();
+                                  Navigator.pop(context);
+                                },
+                                child: const Text(
+                                  "Back",
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(
+                                      color: Colors.red,
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 22.0),
+                                )))),
                   ]),
                 ),
               ),
@@ -116,36 +142,95 @@ class _CameraScreenState extends State<CameraScreen> {
       );
 
   @override
-  Widget build(BuildContext context) {
-    AssetPlayerWidget();
-    _startCameraStream();
-    _toggleButton();
+  void dispose() {
+    super.dispose();
+  }
 
-    return Stack(
-        //child: _cameraDetectionView,
+  Widget results() => Stack(
+        fit: StackFit.loose,
         children: [
           Center(
-            child: Container(
-                //fit: BoxFit.cover,
+            child: RotatedBox(
+                quarterTurns: 1,
+                child: SizedBox(
+                  //fit: BoxFit.cover,
 
-                width: MediaQuery.of(context).size.width,
-                child: _cameraDetectionView),
+                  width: MediaQuery.of(context).size.width,
+                  child: Text(
+                    "Congratulations! You have completed $reps repetitions.",
+                    style: const TextStyle(
+                      fontSize: 32,
+                      color: Color.fromARGB(221, 70, 194, 13),
+                    ),
+                  ),
+                )),
           ),
-          // Expanded(child: _cameraDetectionView)
+          Positioned(
+              bottom: 25,
+              right: 50,
+              child: Align(
+                  alignment: Alignment.bottomRight,
+                  child: RotatedBox(
+                      quarterTurns: 1,
+                      child: GestureDetector(
+                        onTap: () async {
+                          _stopCameraStream();
+                          await BodyDetection.disablePoseDetection();
+                          Navigator.pushReplacement(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (_) => const ExerciseScreen()));
+                          reps = 0;
+                        },
+                        child: const Text(
+                          "NEXT",
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                              color: Colors.red,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 22.0),
+                        ),
+                      )))),
+        ],
+      );
 
-          Container(
-              width: MediaQuery.of(context).size.width / 4,
-              child: AssetPlayerWidget()),
-        ]);
-    //child: AssetPlayerWidget()
-    //
-    //
-    //);
+  Widget showsCamera() => Stack(children: [
+        Center(
+            child: RotatedBox(
+          quarterTurns: 4,
+          child: SizedBox(
+              //fit: BoxFit.cover,
 
-    //MaterialApp(
-    //home: Scaffold(
-    //  body: _cameraDetectionView,
-    //),
-    //);
+              //  width: MediaQuery.of(context).size.width,
+              child: _cameraDetectionView),
+        )),
+        //Expanded(child: _cameraDetectionView),
+        SizedBox(
+            width: MediaQuery.of(context).size.width / 4,
+            child: AssetPlayerWidget()),
+      ]);
+
+  @override
+  Widget build(BuildContext context) {
+    //AssetPlayerWidget();
+    if (reps < 3) {
+      _startCameraStream();
+      _toggleButton();
+    } else if (reps >= 3) {
+      _stopCameraStream();
+    }
+
+    return Center(
+        child: reps >= 3
+            ? Container(
+                width: MediaQuery.of(context).size.width,
+                height: MediaQuery.of(context).size.height,
+                color: Colors.amber,
+                child: results())
+            : Container(
+                width: MediaQuery.of(context).size.width,
+                height: MediaQuery.of(context).size.height,
+                color: Colors.amber,
+                child: showsCamera()));
   }
 }
