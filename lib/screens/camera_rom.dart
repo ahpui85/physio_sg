@@ -11,29 +11,25 @@ import 'package:firebase_signin/widget/asset_player_widget.dart';
 //import 'package:firebase_signin/screens/exercise_screen.dart';
 //import 'package:rflutter_alert/rflutter_alert.dart';
 import 'package:text_to_speech/text_to_speech.dart';
-//import 'package:firebase_signin/model/exercise_list.dart';
+import 'package:firebase_signin/model/exercise_list.dart';
 
-import '../model/rom_list.dart';
 import '../widget/favourite_relief_widget.dart';
 import '../widget/instruction_widget.dart';
+import '../widget/measurement_text.dart';
 import 'general_exercise.dart';
 
-class CameraScreen extends StatefulWidget {
-  const CameraScreen({Key? key, required this.videoName}) : super(key: key);
+class CameraRom extends StatefulWidget {
+  const CameraRom({Key? key, required this.videoName}) : super(key: key);
   final String videoName;
   //final Exercise item;
   @override
-  State<CameraScreen> createState() => _CameraScreenState();
+  State<CameraRom> createState() => _CameraRomState();
 }
 
-class _CameraScreenState extends State<CameraScreen> {
+class _CameraRomState extends State<CameraRom> {
   //late final Exercise item;
-  int exerciseTime = 0;
-  bool resultCount = false;
-  bool startCounting = false;
-  bool counting = false;
   late String toVideoName1;
-  final items = Rom.getRom();
+  final items = Exercise.getExercises();
   TextToSpeech tts = TextToSpeech();
   final bool _isDetectingPose = true;
   final bool _instructionIsOn = false;
@@ -145,7 +141,7 @@ class _CameraScreenState extends State<CameraScreen> {
     super.dispose();
   }
 
-  Widget results({required bool clockPosition}) => Stack(
+  Widget results() => Stack(
         fit: StackFit.loose,
         children: [
           Positioned(
@@ -157,21 +153,13 @@ class _CameraScreenState extends State<CameraScreen> {
                   //fit: BoxFit.cover,
 
                   width: MediaQuery.of(context).size.width,
-                  child: resultCount
-                      ? Text(
-                          'Count:$reps',
-                          style: const TextStyle(
-                            fontSize: 50,
-                            color: Colors.black,
-                          ),
-                        )
-                      : const Text(
-                          "Completed!",
-                          style: TextStyle(
-                            fontSize: 50,
-                            color: Colors.black,
-                          ),
-                        ),
+                  child: const Text(
+                    "Completed!",
+                    style: TextStyle(
+                      fontSize: 50,
+                      color: Colors.black,
+                    ),
+                  ),
                 )),
           ),
           Positioned(
@@ -200,7 +188,6 @@ class _CameraScreenState extends State<CameraScreen> {
                       quarterTurns: 1,
                       child: FloatingActionButton.extended(
                         onPressed: () async {
-                          clockPosition = false;
                           _stopCameraStream();
                           await BodyDetection.disablePoseDetection();
                           Navigator.pushReplacement(
@@ -210,7 +197,7 @@ class _CameraScreenState extends State<CameraScreen> {
                                         videoName: toVideoName1,
                                         rating: 0.5,
                                       )));
-                          neckreps = 0;
+                          maxFlexion = 0;
                         },
                         label: const Text(
                           "See Result",
@@ -229,21 +216,15 @@ class _CameraScreenState extends State<CameraScreen> {
                   child: RotatedBox(
                       quarterTurns: 1,
                       child: FloatingActionButton.extended(
-                        onPressed: () {
-                          FlutterRingtonePlayer.stop();
+                        onPressed: () async {
                           _stopCameraStream();
-                          clockPosition = false;
-                          //await BodyDetection.disablePoseDetection();
-                          //FlutterRingtonePlayer.stop();
+                          await BodyDetection.disablePoseDetection();
                           Navigator.pushReplacement(
                               context,
                               MaterialPageRoute(
                                   builder: (_) => GeneralExercise()));
                           neckreps = 0;
-                          reps = 0;
-                          checkPosition = false;
-                          exerciseTime = 0;
-                          counting = false;
+                          maxFlexion = 0;
                         },
                         label: const Text(
                           "Back to Exercise",
@@ -275,32 +256,7 @@ class _CameraScreenState extends State<CameraScreen> {
         SizedBox(
             width: MediaQuery.of(context).size.width / 3.5,
             child: AssetPlayerWidget(name: toVideoName1)),
-        Positioned(
-          bottom: 35,
-          right: 15,
-          child: Align(
-            alignment: Alignment.bottomRight,
-            child: RotatedBox(
-                quarterTurns: 1,
-                child: counting
-                    ? Text(
-                        '$reps',
-                        textAlign: TextAlign.center,
-                        style: const TextStyle(
-                            color: Colors.red,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 60.0),
-                      )
-                    : Text(
-                        "$neckreps/3",
-                        textAlign: TextAlign.center,
-                        style: const TextStyle(
-                            color: Colors.red,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 40.0),
-                      )),
-          ),
-        ),
+        MeasurementTest(name: toVideoName1),
         Positioned(
             left: 20,
             bottom: 30,
@@ -309,16 +265,8 @@ class _CameraScreenState extends State<CameraScreen> {
                 child: GestureDetector(
                     onTap: () async {
                       _stopCameraStream();
-                      clockPosition = false;
                       await BodyDetection.disablePoseDetection();
-                      FlutterRingtonePlayer.stop();
                       Navigator.pop(context);
-                      neckreps = 0;
-                      reps = 0;
-                      checkPosition = false;
-                      exerciseTime = 0;
-                      counting = false;
-                      clockPosition = false;
                     },
                     child: const Text(
                       "Back",
@@ -329,85 +277,12 @@ class _CameraScreenState extends State<CameraScreen> {
                           fontSize: 30.0),
                     )))),
         _instructionIsOn ? front() : Container(),
-        clockPosition ? playClock() : Container(),
-        checkPosition ? startClock() : Container(),
-        startCounting ? startClockCount() : Container(),
+        clockPosition ? playClock() : Container()
       ]);
-
-  Widget startClockCount() => Positioned(
-        bottom: 15,
-        right: 50,
-        child: RotatedBox(
-          quarterTurns: 1,
-          child: CircularCountDownTimer(
-            width: MediaQuery.of(context).size.width / 3,
-            height: MediaQuery.of(context).size.height / 3,
-            duration: 30,
-            controller: _controller,
-            fillColor: Colors.red,
-            ringColor: Colors.white,
-            textStyle: const TextStyle(
-              fontSize: 38.0,
-              color: Colors.white,
-              fontWeight: FontWeight.bold,
-            ),
-            isReverse: false,
-            onStart: () {
-              FlutterRingtonePlayer.play(
-                  fromAsset: 'assets/ringtone/24 count.mp3',
-                  looping: true,
-                  asAlarm: true);
-            },
-            onComplete: () {
-              FlutterRingtonePlayer.stop();
-              tts.speak('Exercise completed');
-              startCounting = false;
-              checkPosition = false;
-              exerciseTime = 30;
-              neckreps = 3;
-            },
-          ),
-        ),
-      );
-
-  Widget startClock() => Positioned(
-        bottom: 15,
-        right: 50,
-        child: RotatedBox(
-          quarterTurns: 1,
-          child: CircularCountDownTimer(
-            width: MediaQuery.of(context).size.width / 3,
-            height: MediaQuery.of(context).size.height / 3,
-            duration: 5,
-            controller: _controller,
-            fillColor: Colors.red,
-            ringColor: Colors.white,
-            textStyle: const TextStyle(
-              fontSize: 38.0,
-              color: Colors.white,
-              fontWeight: FontWeight.bold,
-            ),
-            isReverse: false,
-            onStart: () {
-              tts.speak("Start in 5 seconds");
-              FlutterRingtonePlayer.play(
-                  fromAsset: 'assets/ringtone/countdown.mp3',
-                  looping: false,
-                  asAlarm: true);
-            },
-            onComplete: () {
-              FlutterRingtonePlayer.stop();
-              tts.speak('Start now');
-              startCounting = true;
-              checkPosition = false;
-            },
-          ),
-        ),
-      );
 
   Widget playClock() => Positioned(
         bottom: 15,
-        right: 50,
+        right: 80,
         child: RotatedBox(
           quarterTurns: 1,
           child: CircularCountDownTimer(
@@ -424,21 +299,16 @@ class _CameraScreenState extends State<CameraScreen> {
             ),
             isReverse: false,
             onStart: () {
-              tts.speak("Hold 5 seconds");
-              FlutterRingtonePlayer.play(
-                  fromAsset: 'assets/ringtone/countdown.mp3',
-                  looping: false,
-                  asAlarm: true);
+              tts.speak("Lift your arms in front of you. Hold 5 seconds");
             },
             onComplete: () {
-              FlutterRingtonePlayer.stop();
-              tts.speak('Released from pose');
+              FlutterRingtonePlayer.playNotification(
+                looping: false,
+                asAlarm: true,
+              );
+              tts.speak('Measurement is completed. Put your arms down.');
               neckreps = neckreps + 1;
-              if (neckreps >= 3) {
-                tts.speak('Exercise completed');
-                clockPosition = false;
-                FlutterRingtonePlayer.stop();
-              }
+              maxFlexion = 0;
             },
           ),
         ),
@@ -451,30 +321,12 @@ class _CameraScreenState extends State<CameraScreen> {
 
   @override
   Widget build(BuildContext context) {
-    switch (toVideoName1) {
-      case 'sumo_squart.mp4':
-        if (exerciseTime < 30) {
-          _startCameraStream();
-          _toggleButton();
-          counting = true;
-          clockPosition = false;
-        } else if (exerciseTime >= 30) {
-          _stopCameraStream();
-          counting = false;
-          resultCount = true;
-        }
-
-        break;
-    }
-
     //AssetPlayerWidget();
     if (neckreps < 3) {
       _startCameraStream();
       _toggleButton();
     } else if (neckreps >= 3) {
       _stopCameraStream();
-      clockPosition = false;
-      FlutterRingtonePlayer.stop();
     }
 
     return Material(
@@ -484,7 +336,7 @@ class _CameraScreenState extends State<CameraScreen> {
                   width: MediaQuery.of(context).size.width,
                   height: MediaQuery.of(context).size.height,
                   color: Colors.amber,
-                  child: results(clockPosition: clockPosition))
+                  child: results())
               : Container(
                   width: MediaQuery.of(context).size.width,
                   height: MediaQuery.of(context).size.height,

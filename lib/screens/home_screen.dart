@@ -1,11 +1,15 @@
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_signin/model/categories_list.dart';
+import 'package:firebase_signin/screens/general_rom.dart';
+
 import 'package:firebase_signin/screens/signin_screen.dart';
+
 import 'package:flutter/material.dart';
-import 'package:firebase_signin/screens/exercise_screen.dart';
+//import 'package:firebase_signin/screens/exercise_screen.dart';
 
 class HomeScreen extends StatelessWidget {
-  const HomeScreen({Key? key}) : super(key: key);
-
+  HomeScreen({Key? key}) : super(key: key);
+  final items = Categories.getCategories();
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -31,52 +35,7 @@ class HomeScreen extends StatelessWidget {
           )
         ],
       ),
-      body: Column(
-        //mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-        children: [
-          GestureDetector(
-            onTap: () {
-              Navigator.pushReplacement(context,
-                  MaterialPageRoute(builder: (_) => const ExerciseScreen()));
-            },
-            child: Container(
-              height: 80,
-              //color: Colors.white70,
-              alignment: Alignment.center,
-              margin: const EdgeInsets.only(top: 100, left: 100, right: 100),
-              padding: const EdgeInsets.all(10),
-              decoration: BoxDecoration(
-                border: Border.all(color: Colors.black, width: 3),
-              ),
-              child: const Text(
-                "Exercise",
-                style: TextStyle(fontSize: 30),
-              ),
-            ),
-          ),
-          const SizedBox(
-            height: 20,
-          ),
-          Expanded(
-              child: Container(
-            height: 80,
-            //color: Colors.white70,
-            alignment: Alignment.center,
-            margin: const EdgeInsets.all(100),
-            padding: const EdgeInsets.all(10),
-            decoration: BoxDecoration(
-              border: Border.all(color: Colors.black, width: 3),
-            ),
-            child: const Text(
-              "View Video",
-              style: TextStyle(fontSize: 30),
-            ),
-          )
-              //color: Colors.white70,
-
-              ),
-        ],
-      ),
+      body: MyGrid(),
       bottomNavigationBar: BottomNavigationBar(
         items: const <BottomNavigationBarItem>[
           BottomNavigationBarItem(
@@ -92,6 +51,100 @@ class HomeScreen extends StatelessWidget {
             label: 'Chats',
           ),
         ],
+      ),
+    );
+  }
+}
+
+class MyGrid extends StatelessWidget {
+  const MyGrid({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return GridView.count(crossAxisCount: 2, children: <Widget>[
+      MyCard(
+        title: 'Exercise',
+        route: 'secondScreen',
+        Color: Colors.blue,
+        Icon: const Icon(
+          Icons.fitness_center,
+          size: 50,
+        ),
+      ),
+      MyCard(
+        title: 'Range of motion',
+        route: 'thirdScreen',
+        Color: Colors.green,
+        Icon: const Icon(
+          Icons.airline_seat_recline_extra,
+          size: 50,
+        ),
+      ),
+      MyCard(
+        title: 'Image',
+        route: 'thirdScreen',
+        Color: Colors.green,
+        Icon: const Icon(
+          Icons.image,
+          size: 50,
+        ),
+      ),
+      MyCard(
+        title: 'Water',
+        route: 'thirdScreen',
+        Color: Colors.blue,
+        Icon: const Icon(
+          Icons.water_drop_rounded,
+          size: 50,
+        ),
+      ),
+      MyCard(
+        title: 'Game',
+        route: 'thirdScreen',
+        Color: Colors.blue,
+        Icon: const Icon(
+          Icons.games,
+          size: 50,
+        ),
+      ),
+      MyCard(
+        title: 'Gratidue',
+        route: 'thirdScreen',
+        Color: Colors.green,
+        Icon: const Icon(
+          Icons.health_and_safety_rounded,
+          size: 50,
+        ),
+      ),
+    ]);
+  }
+}
+
+class MyCard extends StatelessWidget {
+  final String route;
+  final String title;
+  final Icon;
+  final Color;
+  MyCard(
+      {required this.route,
+      required this.title,
+      required this.Icon,
+      required this.Color});
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: () => Navigator.pushNamed(context, route),
+      child: Card(
+        child: Container(
+            padding: const EdgeInsets.all(40),
+            color: Color,
+            child: Column(children: [
+              Icon,
+              Text(title,
+                  style: TextStyle(fontSize: 18, color: Colors.black),
+                  textAlign: TextAlign.center)
+            ])),
       ),
     );
   }

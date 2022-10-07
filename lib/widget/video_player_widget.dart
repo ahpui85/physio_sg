@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'package:video_player/video_player.dart';
 import 'package:firebase_signin/widget/basic_overlay_widget.dart';
+import 'package:firebase_signin/model/exercise_list.dart';
 
 class VideoPlayerWidget extends StatelessWidget {
   final VideoPlayerController controller;

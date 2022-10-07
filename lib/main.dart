@@ -1,4 +1,8 @@
+import 'package:camera/camera.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_signin/screens/general_exercise.dart';
+import 'package:firebase_signin/screens/general_rom.dart';
+
 import 'package:firebase_signin/screens/signin_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_signin/screens/home_screen.dart';
@@ -6,16 +10,23 @@ import 'package:firebase_signin/screens/home_screen.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
-  runApp(const MyApp());
+  final cameras = await availableCameras();
+  runApp(MyApp(cameras: cameras));
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
-
+  const MyApp({required this.cameras, Key? key}) : super(key: key);
+  final List<CameraDescription> cameras;
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      initialRoute: 'homeScreen',
+      routes: {
+        'homeScreen': (context) => HomeScreen(),
+        'secondScreen': ((context) => GeneralExercise()),
+        'thirdScreen': ((context) => GeneralRom()),
+      },
       title: 'Flutter Demo',
       theme: ThemeData(
         // This is the theme of your application.

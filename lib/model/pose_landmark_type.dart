@@ -237,4 +237,15 @@ extension PoseLandmarkTypeExtension on PoseLandmarkType {
         return false;
     }
   }
+
+  bool get isAngleLeftShoulder {
+    switch (this) {
+      case PoseLandmarkType.rightShoulder:
+      case PoseLandmarkType.rightElbow:
+      case PoseLandmarkType.rightWrist:
+        return true;
+      default:
+        return false;
+    }
+  }
 }
